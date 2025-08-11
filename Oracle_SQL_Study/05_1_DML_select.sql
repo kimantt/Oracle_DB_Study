@@ -207,6 +207,73 @@ FROM bookSale WHERE clientNo = '2';
 SELECT SUM(bsQTY) AS "총 주문수량", AVG(bsQTY) AS "평균주문수량"
 FROM bookSale WHERE clientNo = '2';
 
+-- MIN() / MAX()
+-- 도서 판매 현황 중 주문 권수가 가장 많은 주문권수, 가장 적은 주문권수
+SELECT MAX(bsQTY) AS 최대주문량, MIN(bsQTY) AS 최소주문량 FROM bookSale;
 
+-- AVG()
+-- 서점에 있는 도서의 전체 가격 총액, 평균가격, 최고가, 최저가 확인
+SELECT SUM(bookPrice) AS 가격총액,
+       AVG(bookPrice) AS 평균가격,
+       MAX(bookPrice) AS 최고가,
+       MIN(bookPrice) AS 최저가
+FROM book;
 
+-- COUNT()
+-- 도서판매 테이블에서 도서 판매 건수 조회
+-- bsDate가 null을 허용하거나 값이 중복되는 컬럼이라면 count가 원하는 목적으로 반환되지 않을 수 있음
+SELECT COUNT(bsDate) AS "총 판매건수" FROM bookSale;
+
+-- COUNT(*)
+-- 특정 필드값의 수가 아닌 튜플의 수를 세고자 하면 count(*) 활용
+SELECT COUNT(*) AS "총 판매건수" FROM bookSale;
+
+-- 고객 테이블에서 총 취미의 개수 출력 : 취미를 제공한 고객 수
+-- count(속성명) : 속성값이 null인 경우는 제외하고 수를 센 결과 반환
+SELECT COUNT(clientHobby) AS 취미 FROM client;
+
+-- 서점의 총 고객수는 몇명인가?
+SELECT COUNT(*) FROM client;
+
+--------------------------------------------------------------------------------
+
+-- GROUP BY <속성>
+-- 그룹에 대한 질의를 기술할 때 사용
+-- 특정 열(속성)의 값을 기준으로 동일한 값의 데이터들끼리 그룹을 구성
+-- 각 그룹에 대해 한 행씩 질의 결과 생성
+
+-- 각 도서번호별 판매수량 확인
+-- group by 진행한 경우 select절에 집계함수를 통해 필요 열의 집계 진행가능, group by에 기준되는 열은 select에 포함시킬 수 있음
+SELECT SUM(bsQTY), bookNo FROM bookSale GROUP BY bookNo
+ORDER BY 1; -- select된 첫번째 열을 기준으로 정렬
+
+-- 각 지역별 고객의 수
+SELECT clientAddress AS 지역, COUNT(*) AS 고객수 FROM client GROUP BY clientAddress;
+
+-- 성별에 따른 고객의 수
+SELECT clientGender AS 성별, COUNT(*) AS 고객수 FROM client GROUP BY clientGender;
+
+-- 성별에 따른 고객 수와 고객들의 지역
+-- group by의 기준으로 사용하지 않은 필드는 select에 단독 사용 불가
+/*
+SELECT clientGender AS 성별, COUNT(*) AS 고객수, clientAddress AS 지역
+FROM client
+GROUP BY clientGender;
+*/
+SELECT clientGender AS 성별, COUNT(*) AS 고객수, clientAddress AS 지역
+FROM client
+GROUP BY clientGender, clientAddress;
+
+-- HAVING <검색 조건>
+-- group by절에 의해 구성된 그룹들에 대해 적용할 조건 기술
+-- 집계함수와 함께 사용
+-- 주의!
+-- 1. 반드시 group by절과 함께 사용
+-- 2. where절보다 뒤에 위치
+-- 3. 검색조건에 집계함수가 와야함
+
+-- 각 출판사별 도서가격이 25000 이상인 도서가 2권 이상인 출판사번호와 도서권수
+SELECT pubNo, COUNT(*) AS 도서합계 FROM book
+WHERE bookPrice >= 25000
+GROUP BY pubNo HAVING COUNT(*) >= 2;
 
